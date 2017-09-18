@@ -1,0 +1,112 @@
+<!doctype html>
+<html class="no-js" lang="">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="manifest" href="site.webmanifest">
+    <link rel="apple-touch-icon" href="icon.png">
+    <!-- Place favicon.ico in the root directory -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"/>
+    <!--<link rel="stylesheet" href="css/main.css"/>-->
+    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
+    <script src="js/vendor/Leaflet.MakiMarkers.js"></script>
+    <script src="js/vendor/leaflet.ajax.js"></script>
+    <script src="https://unpkg.com/@turf/turf@3.5.2/turf.min.js"></script>
+    <!--<script src="js/main.js"></script>-->
+
+</head>
+<body>
+
+
+<!--<script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>-->
+<div id="map" style="width: auto; height: 800px"></div>
+<!--<div id="map" style="width: auto; height: 100%"></div>-->
+<script>
+    L.MakiMarkers.accessToken = "pk.eyJ1IjoiZ2VvbWFqb3I1NiIsImEiOiJjaW9iejZ4cGYwNDc0dnpsejBmc2g0Z3QzIn0.8hKDWYbdQW7cbIE7eeu4-A";
+    var greenTree = L.MakiMarkers.icon({
+        icon: "park",
+        color: "3F9110",
+        size: "s"
+    });
+    var redTree = L.MakiMarkers.icon({
+        icon: "park",
+        color: "F04441",
+        size: "s"
+    });
+    var blueTree = L.MakiMarkers.icon({
+        icon: "park",
+        color: "442DB5",
+        size: "s"
+    });
+
+    var parcels = new L.GeoJSON.AJAX("data/bct_parcels.geojson", {
+        style: function (feature) {
+            return {
+                color: "#006d2c",
+                weight: .7,
+//                fill: false,
+                opacity: 1,
+                clickable: true
+            };
+        },
+        onEachFeature: function (feature, layer) {
+            if (feature.properties.OWNER_TYPE === "A") {
+                if (feature.geometry.type === 'MultiPolygon') {
+                    var centroid = turf.centroid(feature);
+                    var lon = centroid.geometry.coordinates[0];
+                    var lat = centroid.geometry.coordinates[1];
+
+                    L.marker([lat, lon,], {
+                        icon: greenTree,
+                        title: feature.properties.spjoin_GRANTOR,
+                        riseOnHover: true
+                    }).addTo(map);
+                }
+
+            } else if (feature.properties.OWNER_TYPE === "B") {
+                if (feature.geometry.type === 'MultiPolygon') {
+                    var centroid = turf.centroid(feature);
+                    var lon = centroid.geometry.coordinates[0];
+                    var lat = centroid.geometry.coordinates[1];
+                    L.marker([lat, lon,], {
+                        icon: redTree,
+                        title: feature.properties.BCT,
+                        riseOnHover: true
+                    }).addTo(map);
+                }
+
+
+            } else {
+                if (feature.geometry.type === 'MultiPolygon') {
+                    var centroid = turf.centroid(feature);
+                    var lon = centroid.geometry.coordinates[0];
+                    var lat = centroid.geometry.coordinates[1];
+                    L.marker([lat, lon,], {
+                        icon: blueTree,
+                        title: feature.properties.BCT,
+                        riseOnHover: true
+                    }).addTo(map);
+                }
+            }
+
+        }
+    });
+    var map = L.map('map',
+        {
+            center: [41.74737922562798, -70.0688695],
+            layers: [parcels],
+            zoom: 13
+        });
+    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo(map);
+
+
+</script>
+
+</body>
+</html>
